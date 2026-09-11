@@ -1,0 +1,4 @@
+# Keep locally supplied desktop font sources out of the public repository.
+fonts/*.otf
+fonts/*.ttf
+fonts/*.ttc
