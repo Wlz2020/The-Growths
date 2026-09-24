@@ -83,7 +83,7 @@ html,body{width:100%;height:100%;min-width:0;min-height:0;margin:0;overflow:hidd
 .viewport{position:relative;display:block;flex:0 0 auto;min-width:0;min-height:0;overflow:hidden;isolation:isolate}
 .stage{position:absolute;left:0;top:0;width:1920px;height:1080px;min-width:1920px;min-height:1080px;margin:0;padding:0;transform-origin:0 0;overflow:hidden}
 .footer{flex:0 0 auto;width:100%;max-width:1920px;min-width:0;box-sizing:border-box;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.footer small{min-width:0;overflow-wrap:anywhere}.footer button{flex-shrink:0}
+.footer small{display:none}.footer button{flex-shrink:0}
 
 /* Short Figma guide segments share the center of the choir and award artwork. */
 .choir-sheet>.instruction{left:17.5px;width:254px}
@@ -133,8 +133,8 @@ html,body{font-family:'Shree 714 Web',Arial,Helvetica,sans-serif}
 
 /* Levels 5-6, matched to the supplied Figma frames and exported assets. */
 .chapter-5 .student-service-sheet,.chapter-6 .lanyard-sheet{position:absolute;left:86px;top:55px;width:419px;height:593px;background:#fff;color:#3f3f3f;box-shadow:0 3px 7px #5551;overflow:visible}
-.chapter-5 .plant-thumb,.chapter-6 .plant-thumb{background:transparent}
-.chapter-5 .plant-thumb>.thumb-white-border,.chapter-6 .plant-thumb>.thumb-white-border{display:none}
+.chapter-5 .plant-thumb,.chapter-6 .plant-thumb{background:#000}
+.chapter-5 .plant-thumb>.thumb-white-border,.chapter-6 .plant-thumb>.thumb-white-border{display:block}
 .student-service-sheet h3{position:absolute;left:11px;top:13px;width:190px;margin:0;font-family:'Shippori Antique B1 Web',Arial,sans-serif;font-size:50px;line-height:46px;font-weight:400;letter-spacing:-3.5px}
 .student-service-sheet>.instruction{position:absolute;left:18px;top:126px;width:195px;font-size:13px;line-height:15px;color:#949494}
 .responsibility{position:absolute;padding:0;border:0;background:transparent;color:#888;text-transform:uppercase;font-family:'Shippori Antique B1 Web',Arial,sans-serif;font-size:13px;line-height:16px;letter-spacing:.2px;transition:filter .45s ease,opacity .45s ease,transform .25s ease}
@@ -149,6 +149,7 @@ html,body{font-family:'Shree 714 Web',Arial,Helvetica,sans-serif}
 .student-service-sheet.complete .instruction{color:#6f6f6f}
 
 .lanyard-sheet{background:rgba(255,255,255,.34)!important}.chapter-6 .activity,.chapter-6 .stack-layer,.chapter-6 .lanyard-sheet{overflow:visible}
+.chapter-6 .stack-past[data-key="activity-layer-4"]{opacity:.06}
 .lanyard-sheet>.instruction{position:absolute;left:92px;top:auto;bottom:14px;width:235px;text-align:center;color:#aaa;font-size:13px;line-height:15px;text-transform:uppercase}
 .lanyard{position:absolute;z-index:1;pointer-events:none}.lanyard.student{left:-24px;top:14px;width:178px;height:195px}.lanyard.performance{left:121px;top:193px;width:178px;height:195px}.lanyard.research{left:264px;top:10px;width:178px;height:195px}
 .badge-slot{position:absolute;width:100px;height:132px;border:1px dashed #a5a5a5;border-radius:12px;background:transparent;padding:0;z-index:2;overflow:visible;transition:border-color .2s,background .2s}
@@ -245,7 +246,7 @@ function dispatch(action){
  if(action.type==='finishWatering')readyAt=0;
  if(state.phase==='feedback'&&wasPhase==='play'){
   const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
-   const delay=reduced?500:[2800,3000,2400,2000,2200,0][state.chapter];
+   const delay=reduced?500:[2800,3000,2400,2000,2200,650][state.chapter];
   readyAt=performance.now()+delay;clearTimeout(timer);
   timer=setTimeout(()=>render(),delay);
   // Finish the right-hand sequence, then wait for a fresh click anywhere.
@@ -285,7 +286,8 @@ function responsibilities(){const complete=state.phase!=='play';return `<div cla
 const badgeKey={'Student Congress':'student','May Fourth Performance Event':'performance','Youth Research':'research'};
 const badgeLabel={'Student Congress':'Student<br>Congress','May Fourth Performance Event':'May Fourth<br>Performance<br>Event','Youth Research':'Youth<br>Research'};
 function lanyards(){
- if(state.phase!=='play'){
+ const holdingCompletedCards=state.phase==='feedback'&&performance.now()<readyAt;
+ if(state.phase!=='play'&&!holdingCompletedCards){
   const prompt=state.phase==='feedback';
   return `<div class="l6-composite-state">${art(prompt?'l6-prompt-composite':'l6-watering-composite','l6-composite-art',prompt?'Click the watering can to nurture the next stage of growth':'Watering the next stage of growth')}${prompt?'<button data-reveal aria-label="Water the next stage of growth"></button>':''}</div>`;
  }
@@ -330,7 +332,7 @@ function morph(current,next){
 }
 function render(enter=false){
  const c=chapters[state.chapter],level=state.chapter+(state.phase==='result'?1:0);
- const markup=`<div class="viewport"><section class="stage chapter-${state.chapter+1} phase-${state.phase} ${state.phase==='result'?'result-mode':''}" aria-label="Chapter ${state.chapter+1}: ${c.title}">${art('v2-paper','paper-bg')}${art('v2-tree','tree-bg')}${art('sleeve','sleeve')}<h1>The Growths</h1><span class="chapter-kicker">${String(state.chapter+1).padStart(2,'0')} / 06</span><div class="plant-thumb plant-level-${level}">${plantLayers(plants.slice(1),'plant-art')}<span class="thumb-white-border" data-key="thumb-white-border" aria-hidden="true"></span></div><div class="timeline"><p class="date">${c.date}</p><p class="school">${c.school}</p><p class="theme">${enter?typed(c.theme):c.theme}</p></div><div class="story-paper"></div><p class="motto"><svg class="motto-rule motto-rule-left" viewBox="0 0 136.242 19.094" aria-hidden="true"><path d="M0 0V19.094 M0 9.547H136.242 M136.242 0V19.094"/></svg><span>Every Experience Creates Growth.</span><svg class="motto-rule motto-rule-right" viewBox="0 0 95.131 19.094" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0V19.094 M0 9.547H95.131 M95.131 0V19.094"/></svg></p><section class="growth"><h2><span>[0${state.chapter+1}]</span><small>${c.title}</small></h2>${art('soil','soil')}${scenePlant()}<span class="growth-label">[${c.stage}]</span></section><div class="axis" aria-hidden="true"><svg viewBox="0 0 1112.391 173.855"><path d="M0 86.206H1102.844 M1102.844 0V173.855 M1093.297 0H1112.391 M1093.297 173.855H1112.391"/></svg></div><p class="story ${c.story.length>390?'long':''}"><span data-key="story-${state.chapter}">${storyText(c.story)}</span></p><div class="botany" aria-hidden="true">${art('diagram','botany-diagram')}${plantLayers(['seed','plant-roots','plant-sprout','plant-leaves','growth5-botany','growth6-botany'],'botany-plant')}</div><div class="ruler" aria-label="Chapter ${state.chapter+1} of six available chapters">${RULER_ASSETS.map((src,i)=>`<img data-key="ruler-art-${i}" src="${src}" class="ruler-art ${i===state.chapter?'ruler-current':''}" alt="" aria-hidden="true" draggable="false">`).join('')}</div><div class="activity" aria-label="Chapter activity">${activityStack()}<p class="card-caption">[${c.caption}]</p></div><div class="statusline">${status()}</div></section></div><footer class="footer"><small>${[0,2,5].includes(state.chapter)&&state.phase==='play'?'Drag to place · or select a piece, then its matching blank.':'The Growths · Every Experience Creates Growth.'}</small><div class="test-jump" aria-label="Test chapter jump"><span>TEST</span>${chapters.map((_,i)=>`<button data-jump="${i}" class="${i===state.chapter?'active':''}" aria-label="Jump to chapter ${i+1}" aria-current="${i===state.chapter?'step':'false'}">${String(i+1).padStart(2,'0')}</button>`).join('')}</div><button data-restart aria-label="Restart from chapter one">Restart journey</button></footer>`;
+ const markup=`<div class="viewport"><section class="stage chapter-${state.chapter+1} phase-${state.phase} ${state.phase==='result'?'result-mode':''}" aria-label="Chapter ${state.chapter+1}: ${c.title}">${art('v2-paper','paper-bg')}${art('v2-tree','tree-bg')}${art('sleeve','sleeve')}<h1>The Growths</h1><span class="chapter-kicker">${String(state.chapter+1).padStart(2,'0')} / 06</span><div class="plant-thumb plant-level-${level}">${plantLayers(plants.slice(1),'plant-art')}<span class="thumb-white-border" data-key="thumb-white-border" aria-hidden="true"></span></div><div class="timeline"><p class="date">${c.date}</p><p class="school">${c.school}</p><p class="theme">${enter?typed(c.theme):c.theme}</p></div><div class="story-paper"></div><p class="motto"><svg class="motto-rule motto-rule-left" viewBox="0 0 136.242 19.094" aria-hidden="true"><path d="M0 0V19.094 M0 9.547H136.242 M136.242 0V19.094"/></svg><span>Every Experience Creates Growth.</span><svg class="motto-rule motto-rule-right" viewBox="0 0 95.131 19.094" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0V19.094 M0 9.547H95.131 M95.131 0V19.094"/></svg></p><section class="growth"><h2><span>[0${state.chapter+1}]</span><small>${c.title}</small></h2>${art('soil','soil')}${scenePlant()}<span class="growth-label">[${c.stage}]</span></section><div class="axis" aria-hidden="true"><svg viewBox="0 0 1112.391 173.855"><path d="M0 86.206H1102.844 M1102.844 0V173.855 M1093.297 0H1112.391 M1093.297 173.855H1112.391"/></svg></div><p class="story ${c.story.length>390?'long':''}"><span data-key="story-${state.chapter}">${storyText(c.story)}</span></p><div class="botany" aria-hidden="true">${art('diagram','botany-diagram')}${plantLayers(['seed','plant-roots','plant-sprout','plant-leaves','growth5-botany','growth6-botany'],'botany-plant')}</div><div class="ruler" aria-label="Chapter ${state.chapter+1} of six available chapters">${RULER_ASSETS.map((src,i)=>`<img data-key="ruler-art-${i}" src="${src}" class="ruler-art ${i===state.chapter?'ruler-current':''}" alt="" aria-hidden="true" draggable="false">`).join('')}</div><div class="activity" aria-label="Chapter activity">${activityStack()}<p class="card-caption">[${c.caption}]</p></div><div class="statusline">${status()}</div></section></div><footer class="footer"><small>The Growths · Every Experience Creates Growth.</small><div class="test-jump" aria-label="Test chapter jump"><span>TEST</span>${chapters.map((_,i)=>`<button data-jump="${i}" class="${i===state.chapter?'active':''}" aria-label="Jump to chapter ${i+1}" aria-current="${i===state.chapter?'step':'false'}">${String(i+1).padStart(2,'0')}</button>`).join('')}</div><button data-restart aria-label="Restart from chapter one">Restart journey</button></footer>`;
  const template=document.createElement('template');template.innerHTML=markup;
  if(!app.firstChild)app.append(...template.content.childNodes);
  else {const next=document.createElement('main');next.append(template.content);morph(app,next);app.id='app';}
