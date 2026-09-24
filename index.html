@@ -49,11 +49,11 @@
 /* L2 original Figma assets: grayscale work, color work, then achievement. */
 .talent-network{display:contents}
 .connections-sheet>.team-working-gray,.connections-sheet>.team-working-color{position:absolute;left:42px;top:71px;width:368px;height:245px;object-fit:fill;mix-blend-mode:color-burn;pointer-events:none;transition:opacity 1.2s ease .6s}
-.connections-sheet>.team-working-gray{opacity:.5}
+.connections-sheet>.team-working-gray{opacity:1}
 .connections-sheet>.team-working-color{opacity:0}
 .connections-sheet.connected>.team-working-gray{opacity:0}
 .connections-sheet.connected>.team-working-color{opacity:.8}
-.connections-sheet>.team-result{left:33px;top:62px;width:385px;height:258px;mix-blend-mode:multiply;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
+.connections-sheet>.team-result{left:33px;top:62px;width:385px;height:258px;mix-blend-mode:normal;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
 .connections-sheet.team-revealed>.team-working-gray,.connections-sheet.team-revealed>.team-working-color{opacity:0;transition-delay:0s}
 .connections-sheet.team-revealed>.team-result{opacity:1}
 .connections-sheet .talent-lines,.connections-sheet .me,.connections-sheet .instruction{z-index:2}
@@ -138,7 +138,7 @@ html,body{font-family:'Shree 714 Web',Arial,Helvetica,sans-serif}
 .student-service-sheet h3{position:absolute;left:11px;top:13px;width:190px;margin:0;font-family:'Shippori Antique B1 Web',Arial,sans-serif;font-size:50px;line-height:46px;font-weight:400;letter-spacing:-3.5px}
 .student-service-sheet>.instruction{position:absolute;left:18px;top:126px;width:195px;font-size:13px;line-height:15px;color:#949494}
 .responsibility{position:absolute;padding:0;border:0;background:transparent;color:#888;text-transform:uppercase;font-family:'Shippori Antique B1 Web',Arial,sans-serif;font-size:13px;line-height:16px;letter-spacing:.2px;transition:filter .45s ease,opacity .45s ease,transform .25s ease}
-.responsibility img{width:100%;height:100%;object-fit:contain;filter:grayscale(1);opacity:.18;transition:filter .55s ease,opacity .55s ease}
+.responsibility img{width:100%;height:100%;object-fit:contain;filter:grayscale(1);opacity:.5;transition:filter .55s ease,opacity .55s ease}
 .responsibility span{position:absolute;left:50%;transform:translateX(-50%);width:180px;opacity:0;transition:opacity .45s ease}
 .responsibility.done img{filter:none;opacity:1}.responsibility.done span{opacity:1}.responsibility:not(.done):hover{transform:scale(1.03)}
 .responsibility.finance{left:209px;top:-11px;width:218px;height:183px}.responsibility.finance span{top:172px}
@@ -204,6 +204,10 @@ function reduce(s,action){
 const app=document.querySelector('#app');
 let state=initialState(),timer,readyAt=0,suppressUntil=0,drag=null,busy=false;
 const FILE_ASSETS={
+ 'v2-seed':'./assets/figma/l1-thumb-seed-2x.png','choir-gray':'./assets/figma/l1-choir-gray-2x.png','tile-a':'./assets/figma/l1-tile-a-2x.png','tile-b':'./assets/figma/l1-tile-b-2x.png','tape':'./assets/figma/l1-tape-2x.png','v2-award':'./assets/figma/l1-award-2x.png','choir-base':'./assets/figma/l1-choir-base-2x.png','conductor':'./assets/figma/l1-conductor-2x.png','soil':'./assets/figma/shared-soil-2x.png',
+ 'v2-roots':'./assets/figma/l2-thumb-roots-2x.png','v2-underlay':'./assets/figma/l2-underlay-2x.png','l2-color':'./assets/figma/l2-color-2x.png','v2-team':'./assets/figma/l2-team-2x.png',
+ 'v2-sprout':'./assets/figma/l3-thumb-sprout-2x.png','plot':'./assets/figma/l3-center-sprout-2x.png','v2-person':'./assets/figma/l3-person-2x.png','v2-concert':'./assets/figma/l3-concert-2x.png',
+ 'v2-leaves':'./assets/figma/l4-thumb-leaves-2x.png','leaves':'./assets/figma/l4-center-leaves-2x.png','desk':'./assets/figma/l4-desk-2x.png','debate':'./assets/figma/l4-debate-2x.png','sports':'./assets/figma/l4-sports-2x.png','festival':'./assets/figma/l4-festival-2x.png',
  'l5-finance':'./assets/figma/level5-finance-transparent.png','l5-event':'./assets/figma/level5-event-transparent.png','l5-records':'./assets/figma/level5-records-transparent.png','l5-relations':'./assets/figma/level5-relations-transparent.png','l5-class':'./assets/figma/level5-class-transparent.png',
  'l6-lanyard-student':'./assets/figma/level6-lanyard-student-transparent.png','l6-lanyard-performance':'./assets/figma/level6-lanyard-performance-transparent.png','l6-lanyard-research':'./assets/figma/level6-lanyard-research-transparent.png',
  'l6-card-student':'./assets/figma/level6-card-student-transparent.png','l6-card-performance':'./assets/figma/level6-card-performance-transparent.png','l6-card-research':'./assets/figma/level6-card-research-transparent.png','l6-water':'./assets/figma/level6-water-scene-transparent.png',
@@ -211,7 +215,7 @@ const FILE_ASSETS={
  'growth5-main':'./assets/figma/growth5-main.svg','growth5-thumb':'./assets/figma/growth5-thumb-transparent.png','growth5-botany':'./assets/figma/growth5-botany.svg',
  'growth6-main':'./assets/figma/growth6-main.svg','growth6-thumb':'./assets/figma/growth6-thumb-transparent.png','growth6-botany':'./assets/figma/growth6-botany.svg'
 };
-const art=(name,cl='',alt='')=>`<img src="${ASSETS[name]||FILE_ASSETS[name]}" class="${cl}" alt="${alt}" draggable="false">`;
+const art=(name,cl='',alt='')=>`<img src="${FILE_ASSETS[name]||ASSETS[name]}" class="${cl}" alt="${alt}" draggable="false">`;
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const typed=s=>escape(s);
 let typingFrame=0;
